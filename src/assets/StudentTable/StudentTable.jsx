@@ -11,17 +11,20 @@ const generateStudent = (className) => {
     return acc;
   }, {});
   
-  const avgGrades = Object.entries(grades).reduce((acc, [subject, marks]) => {
+  const avg = Object.entries(grades).reduce((acc, [subject, marks]) => {
     acc[subject] = marks.reduce((sum, mark) => sum + mark, 0) / marks.length;
     return acc;
   }, {})
 
+  const avgGrades = Object.values(avg).flat().reduce((sum, average) => sum + average, 0) / Object.keys(avg).length;
+  
   return{
     id: faker.string.uuid(),
     fullName: `${faker.person.lastName()} ${faker.person.firstName()} ${faker.person.middleName()}`,
     className,
     grades,
-    avgGrades
+    avg,
+    avgGrades: Number(avgGrades.toFixed(2))
   }
 }
 
@@ -50,7 +53,7 @@ const prepareTableData = (classes) => {
       grades: Object.entries(student.grades).map(([subject, grades]) => ({
         subject,
         grades: grades.join(', '),
-        avg: student.avgGrades[subject]
+        avg: student.avg[subject]
       }))
     })
   ))
@@ -87,7 +90,13 @@ function StudentTable () {
           ))}
         </div>
       ),
-    }
+    },
+    {
+      title: "Средний балл",
+      dataIndex: "avgGrades",
+      key: "avgGrades",
+      sorter: (a, b) => a.avgGrades - b.avgGrades
+    },
   ]
     return(
       <ConfigProvider locale={ru_RU}>

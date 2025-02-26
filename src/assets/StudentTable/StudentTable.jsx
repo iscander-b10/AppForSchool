@@ -1,7 +1,8 @@
-import { ConfigProvider } from "antd"
+import { Table, ConfigProvider, Input } from "antd"
 import ru_RU from "antd/locale/ru_RU"
 import { faker } from "@faker-js/faker/locale/ru"
-import { Table } from "antd";
+import { useState } from "react";
+import { useDebounce } from 'use-debounce';
 
 const subjects = ["Русский язык", "Математика", "Литература", "Иностранный язык", "История", "Информатика", "Физкультура"];
 
@@ -61,7 +62,12 @@ const prepareTableData = (classes) => {
 
 function StudentTable () {
   const classes = generateClasses();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  
   const tableData = prepareTableData(classes);
+
+  const filteredData = tableData.filter(student => student.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
 
   const columns = [
     {
@@ -100,9 +106,13 @@ function StudentTable () {
   ]
     return(
       <ConfigProvider locale={ru_RU}>
+        <Input.Search
+          placeholder="Поиск по ФИО"
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <Table
           columns={columns}
-          dataSource={tableData}
+          dataSource={filteredData}
           pagination={{ pageSize: 45 }}
           rowKey="key"
         />

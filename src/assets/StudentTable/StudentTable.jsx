@@ -1,64 +1,9 @@
-import { Table, ConfigProvider, Input } from "antd"
-import ru_RU from "antd/locale/ru_RU"
-import { faker } from "@faker-js/faker/locale/ru"
+import { Table, ConfigProvider, Input } from "antd";
+import ru_RU from "antd/locale/ru_RU";
 import { useState } from "react";
 import { useDebounce } from 'use-debounce';
-
-const subjects = ["Русский язык", "Математика", "Литература", "Иностранный язык", "История", "Информатика", "Физкультура"];
-
-const generateStudent = (className) => {
-  const grades = subjects.reduce((acc, assessment ) => {
-    acc[assessment] = Array.from({ length: 4 }, () => Math.floor(Math.random() * 4) + 2);
-    return acc;
-  }, {});
-  
-  const avg = Object.entries(grades).reduce((acc, [subject, marks]) => {
-    acc[subject] = marks.reduce((sum, mark) => sum + mark, 0) / marks.length;
-    return acc;
-  }, {})
-
-  const avgGrades = Object.values(avg).flat().reduce((sum, average) => sum + average, 0) / Object.keys(avg).length;
-  
-  return{
-    id: faker.string.uuid(),
-    fullName: `${faker.person.lastName()} ${faker.person.firstName()} ${faker.person.middleName()}`,
-    className,
-    grades,
-    avg,
-    avgGrades: Number(avgGrades.toFixed(2))
-  }
-}
-
-const generateClasses = () => {
-  const classes = [];
-
-  for ( let number = 1; number <= 11; number++) {
-    ["А", "Б", "В"].forEach((symbol) => {
-      const className = `${number}${symbol}`;
-      const students = Array.from({ length : 15 }, () => generateStudent(className));
-      classes.push({
-        className,
-        students
-      });
-    });
-  }
-  return classes;
-}
-
-//Преобразование данных для таблицы
-const prepareTableData = (classes) => {
-  return classes.flatMap(classItem => 
-    classItem.students.map(student => ({
-      ...student,
-      key: student.id,
-      grades: Object.entries(student.grades).map(([subject, grades]) => ({
-        subject,
-        grades: grades.join(', '),
-        avg: student.avg[subject]
-      }))
-    })
-  ))
-};
+import "./StudentTable.css";
+import  { prepareTableData, generateClasses } from "../../data.js";
 
 function StudentTable () {
   const classes = generateClasses();
@@ -74,6 +19,10 @@ function StudentTable () {
       title: "Класс",
       dataIndex: "className",
       key: "className",
+      headerStyle: {
+        fontSize: "20px", 
+        fontWeight: 600 
+      },
       filters: Array.from(new Set(tableData.map(item => item.className))).map(c => ({text: c, value: c})),
       onFilter: (value, record) => record.className === value,
     },
@@ -81,12 +30,20 @@ function StudentTable () {
       title: "ФИО",
       dataIndex: "fullName",
       key: "fullName",
+      headerStyle: {
+        fontSize: "20px", 
+        fontWeight: 600 
+      },
       sorter: (a, b) => a.fullName.localeCompare(b.fullName)
     },
     {
       title: "Оценки",
       dataIndex: "grades",
       key: "grades",
+      headerStyle: {
+        fontSize: "20px", 
+        fontWeight: 600 
+      },
       render: (grades) => (
         <div>
           {grades.map((item, index) => (
@@ -101,19 +58,38 @@ function StudentTable () {
       title: "Средний балл",
       dataIndex: "avgGrades",
       key: "avgGrades",
-      sorter: (a, b) => a.avgGrades - b.avgGrades
+      align: "center",
+      sorter: (a, b) => a.avgGrades - b.avgGrades,
+      render: (avg) => {
+        let color = "";
+        if (avg >= 4) color = "green";
+        else if (avg >=3) color = "gold";
+        else color = "red";
+        return (
+          <div 
+            style={{color}}
+            className="avg"
+          >
+            {avg}
+          </div>
+        )
+      }
     },
   ]
     return(
       <ConfigProvider locale={ru_RU}>
         <Input.Search
+          className="inputSearch"
           placeholder="Поиск по ФИО"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Table
           columns={columns}
           dataSource={filteredData}
-          pagination={{ pageSize: 45 }}
+          pagination={{ 
+            pageSize: 45, 
+            className: "pagination"
+           }}
           rowKey="key"
         />
       </ConfigProvider>

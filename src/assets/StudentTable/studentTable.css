@@ -1,0 +1,20 @@
+body {
+    margin: 0
+}
+
+.pagination {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.inputSearch{
+    width: 35%;
+    margin: 10px;
+}
+
+.avg {
+    display: flex;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 24px;
+}

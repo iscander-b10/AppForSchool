@@ -1,19 +1,28 @@
 import { Table, ConfigProvider, Input, Select } from "antd";
 import ru_RU from "antd/locale/ru_RU";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useDebounce } from 'use-debounce';
 import "./StudentTable.css";
 import  { prepareTableData, generateClasses } from "../../data.js";
 
 function StudentTable () {
-  const classes = generateClasses();
+  const classes = useMemo(() => generateClasses(), []);
+  const tableData = useMemo(() => prepareTableData(classes), [classes]);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("lastName");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   
-  const tableData = prepareTableData(classes);
+  const filteredData = useMemo(() => {
+    if (!debouncedSearchTerm) return tableData;
+    return tableData.filter(student => {
+      const searchField = student[searchType].toLowerCase();
+      return searchField.includes(debouncedSearchTerm.toLowerCase());
+    });
+  },  [tableData, debouncedSearchTerm, searchType]);
 
-  const filteredData = tableData.filter(student => {
+  
+  tableData.filter(student => {
     const searchField = student[searchType].toLowerCase();
     return searchField.includes(debouncedSearchTerm.toLowerCase());
   });

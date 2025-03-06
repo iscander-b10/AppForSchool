@@ -3,8 +3,8 @@ import { faker } from "@faker-js/faker/locale/ru";
 const subjects = ["Русский язык", "Математика", "Литература", "Иностранный язык", "История", "Информатика", "Физкультура"];
 
 const generateStudent = (className) => {
-  const grades = subjects.reduce((acc, assessment ) => {
-    acc[assessment] = Array.from({ length: 4 }, () => Math.floor(Math.random() * 4) + 2);
+  const grades = subjects.reduce((acc, subject ) => {
+    acc[subject] = Array.from({ length: 4 }, () => Math.floor(Math.random() * 4) + 2);
     return acc;
   }, {});
   
@@ -14,10 +14,14 @@ const generateStudent = (className) => {
   }, {})
 
   const avgGrades = Object.values(avg).flat().reduce((sum, average) => sum + average, 0) / Object.keys(avg).length;
+
+  const gender = faker.person.sex();
   
   return{
     id: faker.string.uuid(),
-    fullName: `${faker.person.lastName()} ${faker.person.firstName()} ${faker.person.middleName()}`,
+    firstName: `${faker.person.firstName(gender)}`,
+    lastName: `${faker.person.lastName(gender)}`,
+    middleName: `${faker.person.middleName(gender)}`,
     className,
     grades,
     avg,
@@ -54,3 +58,6 @@ export const prepareTableData = (classes) => {
     })
   ))
 };
+
+
+

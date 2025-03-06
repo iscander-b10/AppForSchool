@@ -8,11 +8,12 @@ import  { prepareTableData, generateClasses } from "../../data.js";
 function StudentTable () {
   const classes = generateClasses();
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  // const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   
   const tableData = prepareTableData(classes);
+  console.log(tableData)
 
-  const filteredData = tableData.filter(student => student.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+  // const filteredData = tableData.filter(student => student.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
 
   const columns = [
     {
@@ -27,13 +28,21 @@ function StudentTable () {
       onFilter: (value, record) => record.className === value,
     },
     {
-      title: "ФИО",
-      dataIndex: "fullName",
-      key: "fullName",
-      headerStyle: {
-        fontSize: "20px", 
-        fontWeight: 600 
-      },
+      title: "Фамилия",
+      dataIndex: "lastName",
+      key: "lastName",
+      sorter: (a, b) => a.fullName.localeCompare(b.fullName)
+    },
+    {
+      title: "Имя",
+      dataIndex: "firstName",
+      key: "firstName",
+      sorter: (a, b) => a.fullName.localeCompare(b.fullName)
+    },
+    {
+      title: "Отчество",
+      dataIndex: "middleName",
+      key: "middleName",
       sorter: (a, b) => a.fullName.localeCompare(b.fullName)
     },
     {
@@ -80,12 +89,12 @@ function StudentTable () {
       <ConfigProvider locale={ru_RU}>
         <Input.Search
           className="inputSearch"
-          placeholder="Поиск по ФИО"
+          placeholder="Поиск"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Table
           columns={columns}
-          dataSource={filteredData}
+          dataSource={tableData}
           pagination={{ 
             pageSize: 45, 
             className: "pagination"

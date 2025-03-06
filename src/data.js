@@ -35,7 +35,7 @@ export const generateClasses = () => {
   for ( let number = 1; number <= 11; number++) {
     ["А", "Б", "В"].forEach((symbol) => {
       const className = `${number}${symbol}`;
-      const students = Array.from({ length : 15 }, () => generateStudent(className));
+      const students = Array.from({ length : 2 }, () => generateStudent(className));
       classes.push({
         className,
         students
@@ -47,17 +47,13 @@ export const generateClasses = () => {
 
 export const prepareTableData = (classes) => {
   return classes.flatMap(classItem => 
-    classItem.students.map(student => ({
-      ...student,
-      key: student.id,
-      grades: Object.entries(student.grades).map(([subject, grades]) => ({
-        subject,
-        grades: grades.join(', '),
-        avg: student.avg[subject]
-      }))
+    classItem.students.map(student => {
+
+      return {
+        ...student,
+        key: student.id,
+      };
     })
-  ))
+  );
 };
-
-
 

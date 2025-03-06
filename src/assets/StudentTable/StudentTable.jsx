@@ -1,4 +1,4 @@
-import { Table, ConfigProvider, Input } from "antd";
+import { Table, ConfigProvider, Input, Select } from "antd";
 import ru_RU from "antd/locale/ru_RU";
 import { useState } from "react";
 import { useDebounce } from 'use-debounce';
@@ -8,13 +8,16 @@ import  { prepareTableData, generateClasses } from "../../data.js";
 function StudentTable () {
   const classes = generateClasses();
   const [searchTerm, setSearchTerm] = useState("");
-  // const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  const [searchType, setSearchType] = useState("lastName");
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   
   const tableData = prepareTableData(classes);
-  console.log(tableData)
 
-  // const filteredData = tableData.filter(student => student.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
-
+  const filteredData = tableData.filter(student => {
+    const searchField = student[searchType].toLowerCase();
+    return searchField.includes(debouncedSearchTerm.toLowerCase());
+  });
+  
   const columns = [
     {
       title: "Класс",
@@ -31,70 +34,84 @@ function StudentTable () {
       title: "Фамилия",
       dataIndex: "lastName",
       key: "lastName",
-      sorter: (a, b) => a.fullName.localeCompare(b.fullName)
+      sorter: (a, b) => a.lastName.localeCompare(b.lastName)
     },
     {
       title: "Имя",
       dataIndex: "firstName",
       key: "firstName",
-      sorter: (a, b) => a.fullName.localeCompare(b.fullName)
+      sorter: (a, b) => a.firstName.localeCompare(b.firstName)
     },
     {
       title: "Отчество",
       dataIndex: "middleName",
       key: "middleName",
-      sorter: (a, b) => a.fullName.localeCompare(b.fullName)
+      sorter: (a, b) => a.middleName.localeCompare(b.middleName)
     },
-    {
-      title: "Оценки",
-      dataIndex: "grades",
-      key: "grades",
-      headerStyle: {
-        fontSize: "20px", 
-        fontWeight: 600 
-      },
-      render: (grades) => (
-        <div>
-          {grades.map((item, index) => (
-            <div key={index}>
-              {item.subject}: {item.grades} (Средний: {item.avg})
-            </div>
-          ))}
-        </div>
-      ),
-    },
+    // {
+    //   title: "Оценки",
+    //   dataIndex: "grades",
+    //   key: "grades",
+    //   headerStyle: {
+    //     fontSize: "20px", 
+    //     fontWeight: 600 
+    //   },
+    //   render: (grades) => (
+    //     <div>
+    //       {grades.map((item, index) => (
+    //         <div key={index}>
+    //           {item.subject}: {item.grades} (Средний: {item.avg})
+    //         </div>
+    //       ))}
+    //     </div>
+    //   )
     {
       title: "Средний балл",
       dataIndex: "avgGrades",
       key: "avgGrades",
       align: "center",
       sorter: (a, b) => a.avgGrades - b.avgGrades,
-      render: (avg) => {
+      render: (avgGrades) => {
         let color = "";
-        if (avg >= 4) color = "green";
-        else if (avg >=3) color = "gold";
+        if (avgGrades >= 4) color = "green";
+        else if (avgGrades >=3) color = "gold";
         else color = "red";
         return (
           <div 
             style={{color}}
             className="avg"
           >
-            {avg}
+            {avgGrades}
           </div>
         )
       }
     },
-  ]
+  ];
+
     return(
       <ConfigProvider locale={ru_RU}>
+        <Select
+          style={{
+            margin: "10px",
+            width: "200px"
+          }}
+          defaultValue="lastName"
+          onChange={value => setSearchType(value)}
+          options={[
+            {value: "lastName", label: "Поиск по фамилии"},
+            {value: "firstName", label: "Поиск по имени"},
+            {value: "middleName", label: "Поиск по отчеству"}
+          ]}
+        />
         <Input.Search
           className="inputSearch"
           placeholder="Поиск"
+          allowClear
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Table
           columns={columns}
-          dataSource={tableData}
+          dataSource={filteredData}
           pagination={{ 
             pageSize: 45, 
             className: "pagination"

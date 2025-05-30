@@ -1,128 +1,90 @@
-import { Table, ConfigProvider, Input, Select } from "antd";
+import { Table, ConfigProvider, Input, Select, Flex } from "antd";
 import ru_RU from "antd/locale/ru_RU";
 import { useMemo, useState } from "react";
 import { useDebounce } from 'use-debounce';
 import "./StudentTable.css";
-import  { prepareTableData, generateClasses } from "../../data.js";
+import { tableData, tableColumns } from "../../data";
+
+const baseColumns = [
+    {
+        title: 'Класс',
+        dataIndex: 'className',
+        key: 'className',
+        sorter: (a, b) => toString(a.className - b.className),
+    },
+    {
+        title: 'ФИО',
+        children: [
+            { title: 'Фамилия', dataIndex: 'lastName', key: 'lastName' },
+            { title: 'Имя', dataIndex: 'firstName', key: 'firstName' },
+            { title: 'Отчество', dataIndex: 'middleName', key: 'middleName' }
+        ]
+    },
+    {
+        title: 'Средний балл',
+        dataIndex: 'GPA',
+        key: 'GPA',
+        sorter: (a, b) => a.GPA - b.GPA
+    }
+];
+
 
 function StudentTable () {
-  const classes = useMemo(() => generateClasses(), []);
-  const tableData = useMemo(() => prepareTableData(classes), [classes]);
-  
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchType, setSearchType] = useState("lastName");
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
-  
-  const filteredData = useMemo(() => {
-    if (!debouncedSearchTerm) return tableData;
-    return tableData.filter(student => {
-      const searchField = student[searchType].toLowerCase();
-      return searchField.includes(debouncedSearchTerm.toLowerCase());
-    });
-  },  [tableData, debouncedSearchTerm, searchType]);
-
-  
-  tableData.filter(student => {
-    const searchField = student[searchType].toLowerCase();
-    return searchField.includes(debouncedSearchTerm.toLowerCase());
-  });
-  
-  const columns = [
-    {
-      title: "Класс",
-      dataIndex: "className",
-      key: "className",
-      headerStyle: {
-        fontSize: "20px", 
-        fontWeight: 600 
-      },
-      filters: Array.from(new Set(tableData.map(item => item.className))).map(c => ({text: c, value: c})),
-      onFilter: (value, record) => record.className === value,
-    },
-    {
-      title: "Фамилия",
-      dataIndex: "lastName",
-      key: "lastName",
-      sorter: (a, b) => a.lastName.localeCompare(b.lastName)
-    },
-    {
-      title: "Имя",
-      dataIndex: "firstName",
-      key: "firstName",
-      sorter: (a, b) => a.firstName.localeCompare(b.firstName)
-    },
-    {
-      title: "Отчество",
-      dataIndex: "middleName",
-      key: "middleName",
-      sorter: (a, b) => a.middleName.localeCompare(b.middleName)
-    },
-    // {
-    //   title: "Оценки",
-    //   dataIndex: "grades",
-    //   key: "grades",
-    //   headerStyle: {
-    //     fontSize: "20px", 
-    //     fontWeight: 600 
-    //   },
-    //   render: (grades) => (
-    //     <div>
-    //       {grades.map((item, index) => (
-    //         <div key={index}>
-    //           {item.subject}: {item.grades} (Средний: {item.avg})
-    //         </div>
-    //       ))}
-    //     </div>
-    //   )
-    {
-      title: "Средний балл",
-      dataIndex: "avgGrades",
-      key: "avgGrades",
-      align: "center",
-      sorter: (a, b) => a.avgGrades - b.avgGrades,
-      render: (avgGrades) => {
-        let color = "";
-        if (avgGrades >= 4) color = "green";
-        else if (avgGrades >=3) color = "gold";
-        else color = "red";
-        return (
-          <div 
-            style={{color}}
-            className="avg"
-          >
-            {avgGrades}
-          </div>
-        )
-      }
-    },
-  ];
+    const [studentsCount, setStudentsCount] = useState(300);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [searchType, setSearchType] = useState("lastName");
+    const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+    const [debouncedCount] = useDebounce(studentsCount, 300); 
+    const data = useMemo(() => tableData(debouncedCount), [debouncedCount]);
+    const columns = useMemo(() => [...baseColumns, ...tableColumns], []);
+    const filteredData = useMemo(() => {
+      if (!debouncedSearchTerm) return data;
+        return data.filter(student => 
+            student[searchType].toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        );
+      }, [data, debouncedSearchTerm, searchType]
+    );
 
     return(
       <ConfigProvider locale={ru_RU}>
-        <Select
-          style={{
-            margin: "10px",
-            width: "200px"
-          }}
-          defaultValue="lastName"
-          onChange={value => setSearchType(value)}
-          options={[
-            {value: "lastName", label: "Поиск по фамилии"},
-            {value: "firstName", label: "Поиск по имени"},
-            {value: "middleName", label: "Поиск по отчеству"}
-          ]}
-        />
-        <Input.Search
-          className="inputSearch"
-          placeholder="Поиск"
-          allowClear
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <Flex justify="space-between" style={{ width: "100%" }}>
+          <Flex style={{width: "50%"}}>
+            <Select
+              style={{
+                margin: "10px",
+                width: "200px"
+              }}
+              defaultValue="lastName"
+              onChange={value => setSearchType(value)}
+              options={[
+                {value: "lastName", label: "Поиск по фамилии"},
+                {value: "firstName", label: "Поиск по имени"},
+                {value: "middleName", label: "Поиск по отчеству"}
+              ]}
+            />
+            <Input.Search
+              className="inputSearch"
+              placeholder="Поиск"
+              allowClear
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </Flex>
+          <Input
+            style={{
+              margin: "10px",
+              width: "13%"
+            }}
+            allowClear
+            type="number"
+            value={studentsCount}
+            onChange={(e) => setStudentsCount(Math.max(1, parseInt(e.target.value) || 1))}
+          />
+        </Flex>
         <Table
           columns={columns}
           dataSource={filteredData}
           pagination={{ 
-            pageSize: 45, 
+            pageSize: 10, 
             className: "pagination"
            }}
           rowKey="key"

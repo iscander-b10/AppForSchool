@@ -1,20 +1,108 @@
 body {
-    margin: 0
+    margin: 0;
 }
 
+/* Основные стили таблицы */
+.strict-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.strict-table .ant-table-container {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Общие стили ячеек */
+.strict-table .ant-table-cell {
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: inherit;
+}
+
+/* Стили заголовков */
+.strict-table .ant-table-thead > tr > th {
+  background-color: #f0f2f5;
+  color: #1f1f1f;
+  font-weight: 600;
+  border-bottom: 2px solid #c0c0c0;
+  border-right: 1px solid #d0d0d0;
+  padding: 12px 8px;
+  white-space: nowrap;
+}
+
+/* Убираем правую границу у последней ячейки */
+.strict-table .ant-table-tbody > tr > td:last-child,
+.strict-table .ant-table-thead > tr > th:last-child {
+  border-right: none;
+}
+
+/* Чередование цветов строк */
+.strict-table .ant-table-tbody > tr:nth-child(odd) > td {
+  background-color: #fafafa;
+}
+
+.strict-table .ant-table-tbody > tr:nth-child(even) > td {
+  background-color: #ffffff;
+}
+
+/* Улучшенный стиль при наведении - заметный на всех строках */
+.strict-table .ant-table-tbody > tr:hover > td {
+  background-color: #e6f7ff !important;
+  position: relative;
+}
+
+/* Добавляем акцентную полосу при наведении */
+.strict-table .ant-table-tbody > tr:hover > td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: #1890ff;
+}
+
+/* Запрет переноса текста */
+.strict-table .no-wrap-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Стили пагинации */
 .pagination {
-    display: flex !important;
-    justify-content: center !important;
+    display: flex;
+    justify-content: center;
 }
 
-.inputSearch{
+.pagination .ant-pagination-item,
+.pagination .ant-pagination-prev,
+.pagination .ant-pagination-next {
+  border-color: #d9d9d9;
+}
+
+.pagination .ant-pagination-item-active {
+  border-color: #096dd9;
+  background-color: #f0f7ff;
+}
+
+/* Стили для поля поиска */
+.inputSearch {
     width: 35%;
     margin: 10px;
 }
 
-.avg {
-    display: flex;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 24px;
+/* Фикс для вложенных заголовков */
+.strict-table .ant-table-thead th.ant-table-cell:not([colspan]) {
+  border-left: 1px solid #e8e8e8;
+}
+
+.strict-table .ant-table-thead th.ant-table-cell:first-child {
+  border-left: none;
 }
